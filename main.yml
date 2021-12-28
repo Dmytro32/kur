@@ -20,7 +20,7 @@
         host: "{{ item }}" 
         password: "1212"
         login_user: root
-        login_password: pass
+        login_password: "1212"
         check_implicit_admin: yes
         priv: "*.*:ALL,GRANT"
       with_items:
