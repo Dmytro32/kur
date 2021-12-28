@@ -1,0 +1,18 @@
+---
+- hosts: host3
+  become: yes   
+  tasks:
+    - name: Install MySQL
+      apt: name={{ item }} update_cache=yes cache_valid_time=3600 state=present
+      with_items:
+        - docker.io
+        - python-docker
+        - python-mysqldb
+        - mysql-server
+    - name: Start the MySQL service
+      service: 
+        name: mysql 
+        state: started
+        enabled: true
+
+

@@ -1,0 +1,58 @@
+---   
+- hosts: host3     
+  become: yes   
+  vars:   
+     docker_volume: db_data
+     docker_network: ansible_net
+     db_name: db
+  tasks:   
+    - name: Stop the MySQL service
+      service: 
+        name: mysql 
+        state: stopped
+        enabled: true
+    - name: Launch database container
+      docker_container:
+        name: "{{ db_name }}"
+        image: mysql:5.7
+        volumes:
+          - "{{ docker_volume }}:/var/lib/mysql:rw"
+        restart: true
+        env:
+          MYSQL_ROOT_PASSWORD: pass
+          MYSQL_DATABASE: "{{ db_name }}"
+          MYSQL_USER: root
+          MYSQL_PASSWORD: pass   
+        ports:
+          - "3306:3306"
+    - name: Start the MySQL service
+      service: 
+        name: mysql 
+        state: started
+        enabled: true          
+    - name: Install database
+      mysql_db:
+        name: firm 
+        state: present 
+        login_user: root 
+        login_password: pass     
+    - name: Install Sql Scripts
+      copy: 
+        src: ./sql-scripts/CreateTable.sql
+        dest: /tmp/CreateTable.sql
+    - name: Import Sql Scripts    
+      mysql_db: 
+        name: firm
+        state: import 
+        target: /tmp/CreateTable.sql
+    - name: Checking
+      docker_container_info:
+        name: "{{ db_name }}"
+      register: result
+    - name: Does container exist?
+      debug:
+        msg: "The container {{ 'exists' if result.exists else 'does not exist' }}"
+    - name: Print the status of the containe
+      debug:
+        msg: "The container status is {{ result.container['State']['Status'] }}"
+      when: result.exists
