@@ -35,13 +35,14 @@
         name: firm 
         state: present 
         login_user: root 
-        login_password: pass     
+        login_password: "1212"     
     - name: Install Sql Scripts
       copy: 
         src: ./sql-scripts/CreateTable.sql
         dest: /tmp/CreateTable.sql
     - name: Import Sql Scripts    
       mysql_db: 
+        login_password: "1212"     
         name: firm
         state: import 
         target: /tmp/CreateTable.sql
